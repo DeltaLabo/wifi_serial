@@ -1,7 +1,7 @@
 import wifi_serial
 
-# Create an instance of WiFiSerial with the desired port and timeout
-serial = wifi_serial.WiFiSerial(port=8080, timeout=5)
+# Create an instance of WiFiSerial with the desired port, timeout, and log_requests parameter
+serial = wifi_serial.WiFiSerial(port=8080, timeout=5, log_requests=False)
 
 try:
     while True:
