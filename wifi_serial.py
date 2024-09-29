@@ -38,6 +38,8 @@ class DataBuffer:
 
 # HTTP request handler class
 class RequestHandler(BaseHTTPRequestHandler):
+    log_requests = True
+
     def do_POST(self):
         global data_buffer
         # Get the length of the incoming data
@@ -48,20 +50,30 @@ class RequestHandler(BaseHTTPRequestHandler):
         # Append the data to the buffer
         data_buffer.append(post_data)
         
+        # Conditionally log the incoming data
+        if self.log_requests:
+            print(post_data)
+        
         # Send a 200 OK response
         self.send_response(200)
         self.end_headers()
+    
+    def log_message(self, format, *args):
+        # Override log_message to conditionally suppress logging
+        if self.log_requests:
+            super().log_message(format, *args)
 
 # Thread class to run the server
 class ServerThread(threading.Thread):
-    def __init__(self, port):
+    def __init__(self, port, log_requests=True):
         super().__init__()
         self.daemon = True
         self.server_address = ('', port)
         self.httpd = HTTPServer(self.server_address, RequestHandler)
+        RequestHandler.log_requests = log_requests
         hostname = socket.gethostname()
         local_ip = socket.gethostbyname(hostname)
-        print(f'Starting server on {local_ip}:{port}...')
+        print(f'Server running on {local_ip}:{port}')
 
     def run(self):
         # Start the server
@@ -69,12 +81,12 @@ class ServerThread(threading.Thread):
 
 # Main class for WiFi serial communication
 class WiFiSerial:
-    def __init__(self, port, timeout=None):
+    def __init__(self, port, timeout=None, log_requests=True):
         global data_buffer
         data_buffer = DataBuffer()
         self.timeout = timeout
-        # Start the server thread
-        self.server_thread = ServerThread(port)
+        # Start the server thread with the log_requests parameter
+        self.server_thread = ServerThread(port, log_requests)
         self.server_thread.start()
 
     def read(self, size=1):
@@ -123,8 +135,8 @@ if __name__ == "__main__":
     import sys
 
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
-    # Create an instance of WiFiSerial
-    serial = WiFiSerial(port)
+    # Create an instance of WiFiSerial with the log_requests parameter
+    serial = WiFiSerial(port, log_requests=False)
 
     try:
         while True:
