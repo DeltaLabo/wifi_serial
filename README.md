@@ -4,7 +4,7 @@ wifi_serial
 
 ### What is this repository for?
 
-This repository was created to enable WiFi-based, serial-like communication from ESP32 microcontrollers to PCs, for wireless logging and debugging purposes.
+This repository was created to enable WiFi-based, serial-like communication from ESP32 microcontrollers to PCs, for simple wireless logging and debugging purposes.
 On the client side (ESP32), it supports the `print`. `println`, and `write` methods of a wired `Serial` interface.
 On the server side (Python on a PC), it supports the `read`, `readline`, and `read_until` methods found in the [`pyserial`](https://github.com/pyserial/pyserial) library.
 
