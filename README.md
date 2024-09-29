@@ -16,7 +16,7 @@ On the server side (Python on a PC), it supports the `read`, `readline`, and `re
 * Follow these [instructions](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html) to set up the ESP32 in the Arduino IDE
 * Clone this repo and run `wifi_serial.py` on your server PC.
 * `#include "WiFiSerial.h"` in your main Arduino code file.
-* Add your IP address and port (shown by the Python script) in your main Arduino code file.
+* Copy your server address and port (shown by the Python script) to your main Arduino code file.
 
 ### Contribution guidelines ###
 
