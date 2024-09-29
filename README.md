@@ -11,6 +11,7 @@ On the server side (Python on a PC), it supports the `read`, `readline`, and `re
 ### How do I set up?
 
 * Install Git
+* Install Python
 * Install Arduino IDE
 * Follow these [instructions](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html) to set up the ESP32 in the Arduino IDE
 * Clone this repo and run `wifi_serial.py` on your server PC.
