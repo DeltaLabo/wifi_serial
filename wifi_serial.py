@@ -6,7 +6,7 @@ import time
 # Class to handle the data buffer with thread safety
 class DataBuffer:
     def __init__(self):
-        self.buffer = ""
+        self.buffer = b""
         self.lock = threading.Lock()
 
     def append(self, data):
@@ -24,15 +24,17 @@ class DataBuffer:
     def read_until(self, delimiter):
         # Read from the buffer until the specified delimiter is found
         with self.lock:
-            if delimiter in self.buffer:
-                before, after = self.buffer.split(delimiter, 1)
-                self.buffer = after
-                return before + delimiter
+            delimiter_index = self.buffer.find(delimiter)
+            if delimiter_index != -1:
+                delimiter_index += len(delimiter)
+                data = self.buffer[:delimiter_index]
+                self.buffer = self.buffer[delimiter_index:]
+                return data
             return None
 
     def readline(self):
         # Read a line from the buffer (up to and including '\n')
-        return self.read_until('\n')
+        return self.read_until(b'\n')
 
 # HTTP request handler class
 class RequestHandler(BaseHTTPRequestHandler):
@@ -41,7 +43,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         # Get the length of the incoming data
         content_length = int(self.headers['Content-Length'])
         # Read the incoming data
-        post_data = self.rfile.read(content_length).decode('utf-8')
+        post_data = self.rfile.read(content_length)
         
         # Append the data to the buffer
         data_buffer.append(post_data)
@@ -65,7 +67,7 @@ class ServerThread(threading.Thread):
         # Start the server
         self.httpd.serve_forever()
 
-# Main class for WiFi serial
+# Main class for WiFi serial communication
 class WiFiSerial:
     def __init__(self, port, timeout=None):
         global data_buffer
@@ -85,7 +87,7 @@ class WiFiSerial:
                 return data
         
             if self.timeout is not None and time.time() > end_time:
-                raise TimeoutError("Read operation timed out")
+                raise TimeoutError("TimeoutError: read operation timed out")
         
             time.sleep(0.01)  # Avoid busy waiting
 
@@ -99,22 +101,21 @@ class WiFiSerial:
                 return line
         
             if self.timeout is not None and time.time() > end_time:
-                raise TimeoutError("Readline operation timed out")
+                raise TimeoutError("TimeoutError: readline operation timed out")
         
             time.sleep(0.01)  # Avoid busy waiting
 
     def read_until(self, expected=b'\n'):
         # Read until a specified delimiter is found, with an optional timeout
         end_time = None if self.timeout is None else (time.time() + self.timeout)
-        expected_str = expected.decode('utf-8')
         
         while True:
-            data = data_buffer.read_until(expected_str)
+            data = data_buffer.read_until(expected)
             if data:
                 return data
         
             if self.timeout is not None and time.time() > end_time:
-                raise TimeoutError("Read_until operation timed out")
+                raise TimeoutError("TimeoutError: read_until operation timed out")
         
             time.sleep(0.01)  # Avoid busy waiting
 
@@ -123,7 +124,7 @@ if __name__ == "__main__":
 
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
     # Create an instance of WiFiSerial
-    logger = WiFiSerial(port)
+    serial = WiFiSerial(port)
 
     try:
         while True:
